@@ -1,4 +1,4 @@
-import { PUBLIC_KEY } from "../env/keys.js";
+import { PUBLIC_KEY } from "../env/key.js";
 
 const _apiBase = 'https://gateway.marvel.com:443/v1/public/'
 
