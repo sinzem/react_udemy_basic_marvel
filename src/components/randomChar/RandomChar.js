@@ -11,7 +11,7 @@ class RandomChar extends Component {
 
     constructor(props) {
         super(props);
-        this.updateChar(); /* (для тестирования - из конструктора методы не вызываем) */
+        // this.updateChar(); /* (для тестирования - из конструктора методы не вызываем) */
     }
 
     state = {
@@ -27,11 +27,22 @@ class RandomChar extends Component {
 
     marvelService = new MarvelService();
 
+    componentDidMount() {
+        this.updateChar();
+    }
+
     onCharLoaded = (char) => {
         this.setState({
             char, 
             loading: false
         });
+    }
+
+    onCharLoading = () => {
+        this.setState({
+            loading: true,
+            error: false
+        })
     }
 
     onError = () => {
@@ -43,11 +54,14 @@ class RandomChar extends Component {
 
     updateChar = () => {
         const id = Math.floor(Math.random() * (1011400 - 1011000) + 1011000); 
+        this.onCharLoading();
         this.marvelService
             .getCharacter(id) /* (сервис вернет обьект, помещаем его целиком в состояния) */
             .then(this.onCharLoaded) /* (в промисах пришедший результат автоматически подставится аргументом в вызываемую функцию) */
             .catch(this.onError);
     }
+
+
 
     render() {
 
@@ -72,7 +86,7 @@ class RandomChar extends Component {
                     <p className="randomchar__title">
                         Or choose another one
                     </p>
-                    <button className="button button__main">
+                    <button className="button button__main" onClick={this.updateChar}>
                         <div className="inner">try it</div>
                     </button>
                     <img src={mjolnir} alt="mjolnir" className="randomchar__decoration"/>
@@ -93,7 +107,7 @@ const View = ({char}) => {
    
 
     const processedThumbnail = (thumbnail && thumbnail.indexOf("not available") === -1) 
-                                ? {height: "auto", maxHeight: "180px", alignSelf: "center"} : null;
+                                ? {objectFit: "contain", alignSelf: "center"} : null;
 
     return (
         <div className="randomchar__block">
