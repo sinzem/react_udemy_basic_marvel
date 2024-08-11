@@ -11,26 +11,36 @@ class CharList extends Component  {
     state = {
         chars: [], 
         loading: true,
-        error: false
+        newItemLoading: false,
+        error: false,
+        offset: 210,
+        charEnded: false
     }
 
     marvelService = new MarvelService();
 
     componentDidMount() {
-        this.updateChars();
+        this.onRequest();
     }
 
-    onCharsLoaded = (chars) => {
-        this.setState({
-            chars, 
-            loading: false
-        });
+    onCharsLoaded = (newChars) => {
+        let ended = false;
+        if (newChars.length < 9) {
+            ended = true;
+        }
+
+        this.setState(({chars, offset}) => ({
+            chars: [...chars, ...newChars], 
+            loading: false,
+            newItemLoading: false,
+            offset: offset + 9,
+            charEnded: ended
+        }));
     }
 
-    onCharsLoading = () => {
+    onCharListLoading = () => {
         this.setState({
-            loading: true,
-            error: false
+            newItemLoading: true
         })
     }
 
@@ -41,20 +51,20 @@ class CharList extends Component  {
         });
     }
 
-    updateChars = () => {
-        this.onCharsLoading();
+    onRequest = (offset) => {
+        this.onCharListLoading();
         this.marvelService
-            .getAllCharacters() 
+            .getAllCharacters(offset) 
             .then(this.onCharsLoaded) /* (в промисах пришедший результат автоматически подставится аргументом в вызываемую функцию) */
             .catch(this.onError);
     }
 
     render() {
 
-        const {chars, loading, error} = this.state; 
+        const {chars, loading, error, newItemLoading, offset, charEnded} = this.state; 
         const errorMessage = error ? <ErrorMessage /> : null;
         const spinner = loading ? <Spinner /> : null;
-        const content = !(loading || error) ? <View chars={chars} /> : null;
+        const content = !(loading || error) ? <View chars={chars} onCharSelected={this.props.onCharSelected}/> : null;
 
         return (
             <div className="char__list">
@@ -63,7 +73,11 @@ class CharList extends Component  {
                 {spinner}
                 {content}
                
-                <button className="button button__main button__long">
+                <button 
+                    disabled={newItemLoading}
+                    onClick={() => this.onRequest(offset)}
+                    style={{"display": charEnded ? "none" : "block"}}
+                    className="button button__main button__long">
                     <div className="inner">load more</div>
                 </button>
             </div>
@@ -72,7 +86,7 @@ class CharList extends Component  {
 
 }
 
-const View = ({chars}) => {
+const View = ({chars, onCharSelected}) => {
 
     const processedThumbnail = (char) => {
         return (char.thumbnail && char.thumbnail.indexOf("not available") === -1) 
@@ -82,7 +96,7 @@ const View = ({chars}) => {
     return ( 
         <ul className="char__grid">
             {chars.map(char => 
-                <li className="char__item" key={char.id}>
+                <li className="char__item" key={char.id} onClick={() => onCharSelected(char.id)}>
                     <img src={char.thumbnail} alt={char.name} style={processedThumbnail(char)} />
                     <div className="char__name">{char.name}</div>
                 </li>
