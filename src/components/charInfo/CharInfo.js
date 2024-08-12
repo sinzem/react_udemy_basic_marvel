@@ -1,4 +1,5 @@
 import { Component } from 'react';
+import PropTypes from 'prop-types'; /* (модуль для проверки типов входящих пропсов, подключение внизу перед экспортом) */
 
 import MarvelService from '../../services/MarvelService';
 import Spinner from '../spinner/Spinner';
@@ -126,6 +127,10 @@ const View = ({char}) => {
             </ul>
         </>
     )
+}
+
+CharInfo.propTypes = { /* (проверяем тип приходящих пропсов, в случае несоответствия выдаст предупреждение в консоль) */
+    charId: PropTypes.number/* .isRequired */, /* (типизируем, можно добавить флажок, что пропс обязательный(isRequired)) */
 }
 
 export default CharInfo;

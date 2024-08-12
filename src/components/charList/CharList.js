@@ -1,4 +1,5 @@
 import { Component } from 'react';
+import PropTypes from 'prop-types'; /* (модуль для проверки типов входящих пропсов, подключение внизу перед экспортом) */
 
 import MarvelService from '../../services/MarvelService';
 import ErrorMessage from '../errorMessage/ErrorMessage';
@@ -86,24 +87,63 @@ class CharList extends Component  {
 
 }
 
-const View = ({chars, onCharSelected}) => {
+class View extends Component {
+    // constructor({chars, onCharSelected}) {
+    //     super({chars, onCharSelected});
+    // }
 
-    const processedThumbnail = (char) => {
+    processedThumbnail = (char) => {
         return (char.thumbnail && char.thumbnail.indexOf("not available") === -1) 
                                 ? {objectFit: "fill", alignSelf: "center"} : null;
     }
+
+    itemRefs = [];
+
+    setRef = (ref) => {
+        this.itemRefs.push(ref);
+    }
+
+    focusOnItem = (id) => {
+        this.itemRefs.forEach(item => item.classList.remove('char__item_selected'));
+        this.itemRefs[id].classList.add('char__item_selected');
+        this.itemRefs[id].focus();
+    }
+
+    render() {
+        return ( 
+            <ul className="char__grid">
+                {this.props.chars.map((char, i) => 
+                    <li className="char__item" 
+                        key={char.id}
+                        tabIndex={0}
+                        ref={this.setRef} 
+                        onClick={() => {
+                            this.props.onCharSelected(char.id)
+                            this.focusOnItem(i);
+                        
+                        }}
+                        onKeyPress={(e) => {
+                            if (e.key === ' ' || e.key === "Enter") {
+                                this.props.onCharSelected(char.id);
+                                this.focusOnItem(i);
+                            }
+                        }}>
+                        <img src={char.thumbnail} alt={char.name} style={this.processedThumbnail(char)} />
+                        <div className="char__name">{char.name}</div>
+                    </li>
+                )}
+            </ul> 
+        )
+         
+    }
+
+ 
     
-    return ( 
-        <ul className="char__grid">
-            {chars.map(char => 
-                <li className="char__item" key={char.id} onClick={() => onCharSelected(char.id)}>
-                    <img src={char.thumbnail} alt={char.name} style={processedThumbnail(char)} />
-                    <div className="char__name">{char.name}</div>
-                </li>
-            )}
-        </ul> 
-    )
-     
+
+}
+
+CharList.propTypes = {  /* (проверяем тип приходящих пропсов, в случае несоответствия выдаст предупреждение в консоль) */
+    onCharSelected: PropTypes.func.isRequired, /* (типизируем, можно добавить флажок, что пропс обязательный(isRequired)) */
 }
 
 export default CharList;

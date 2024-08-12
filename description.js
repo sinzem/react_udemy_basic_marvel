@@ -4,3 +4,4 @@
 
 // npm start - запуск
 
+// npm i prop-types --save  (для проверки типов пропсов - наподобие TypeScript, примеры в CharInfo или CharList)
